@@ -43,6 +43,22 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# --- Background Image ---
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image: url("https://raw.githubusercontent.com/ashlen2-stack/bridgemodel/4282854ff80fb53251f0071f79c8964f50ed5d37/assets/396099625_710e826d1d_b.jpg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        opacity: 0.12;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 def fmt_pct(x):
     return f"{x*100:.1f}%"
 
@@ -51,7 +67,7 @@ def fmt_num(x):
 
 # --- Title ---
 st.markdown(
-    "<h2 style='text-align:center; margin-top:-40px;'>Washington State Bridge Network Strategy Simulator</h2>",
+    "<h2 style='text-align:center; margin-top:-55px;'>Washington State Bridge Network Strategy Simulator</h2>",
     unsafe_allow_html=True,
 )
 
