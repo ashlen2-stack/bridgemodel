@@ -235,9 +235,8 @@ with middle_col:
         )
 
         st.markdown("---")
-
-     # --- CLOSED BRIDGES CHART ---
-st.subheader("Closed Bridges Over Time")
+# --- CLOSED BRIDGES + BACKLOG COST (DUAL AXIS) ---
+st.subheader("Closed Bridges and Replacement Backlog Cost Over Time")
 
 closed_df = pd.DataFrame({
     "Year": closed_bridges.index.astype(int),
@@ -247,7 +246,15 @@ closed_df = pd.DataFrame({
 # Identify years where closures increase
 closed_df["Increasing"] = (closed_df["Closed Bridges"].diff() > 0).astype(int)
 
-# Shaded area for increasing years
+# Compute backlog cost in dollars
+closed_df["Backlog Cost"] = (
+    closed_df["Closed Bridges"] * avg_deck_area * repl_cost
+)
+
+# Format cost axis in millions
+closed_df["Backlog Cost (Millions)"] = closed_df["Backlog Cost"] / 1_000_000
+
+# Shaded area for increasing closures
 shaded = (
     alt.Chart(closed_df)
     .mark_area(color="lightgray")
@@ -262,30 +269,48 @@ shaded = (
     )
 )
 
-# Bold black line
-line = (
+# Line for closed bridges (left axis)
+line_closed = (
     alt.Chart(closed_df)
     .mark_line(color="black", strokeWidth=2)
     .encode(
         x=alt.X("Year:Q", title="Year"),
-        y=alt.Y("Closed Bridges:Q", title="Number of Closed Bridges"),
+        y=alt.Y("Closed Bridges:Q", title="Closed Bridges"),
     )
 )
 
-closed_chart = (shaded + line).properties(height=300)
+# Line for backlog cost (right axis)
+line_cost = (
+    alt.Chart(closed_df)
+    .mark_line(color="#1f77b4", strokeWidth=2)
+    .encode(
+        x="Year:Q",
+        y=alt.Y(
+            "Backlog Cost (Millions):Q",
+            title="Replacement Backlog Cost (Million $)",
+            axis=alt.Axis(titleColor="#1f77b4")
+        )
+    )
+)
+
+closed_chart = alt.layer(shaded, line_closed, line_cost).resolve_scale(
+    y='independent'
+).properties(height=350)
 
 st.altair_chart(closed_chart, use_container_width=True)
 
 st.markdown(
     """
     **How to interpret this chart:**  
-    Rising closures (highlighted in gray) indicate years where the system is falling behind, increasing future replacement needs and long‑term budget pressure.  
-    Flat or declining closures suggest the strategy is stabilizing or reducing the backlog of closed structures.  
-    This chart helps illustrate the concept of *“mortgaging the future”*—delaying preservation or replacement today increases the cost burden in later years.
+    • The **black line** shows the number of closed bridges.  
+    • The **blue line** shows the **replacement backlog cost** in millions of dollars.  
+    • **Gray shading** highlights years where closures increase — periods where the system is falling behind.  
+    • When shading and the blue line rise together, it signals **accelerating long‑term financial pressure**.  
+    • This is the essence of *“mortgaging the future”*: delaying preservation today increases the cost burden tomorrow.
     """
 )
 
-
+    
 # --- RIGHT COLUMN ---
 with right_col:
     st.subheader("Policy Strategy Definitions")
