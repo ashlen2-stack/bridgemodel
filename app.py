@@ -59,11 +59,13 @@ st.markdown(
 st.markdown(
     f"""
     <style>
+    /* Ensure app content is fully opaque */
     .stApp {{
         position: relative;
-        background: none;
+        z-index: 0;
     }}
 
+    /* Background image layer */
     .stApp::before {{
         content: "";
         position: fixed;
@@ -75,7 +77,18 @@ st.markdown(
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
-        opacity: 0.18;
+        z-index: -2;
+    }}
+
+    /* Soft white overlay to keep content readable */
+    .stApp::after {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.82); /* adjust transparency here */
         z-index: -1;
     }}
     </style>
