@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- Core UI CSS ---
+# --- Custom CSS ---
 st.markdown(
     """
     <style>
@@ -38,59 +38,6 @@ st.markdown(
         padding: 0.5rem 1.5rem;
         font-weight: 600;
     }
-
-    /* Table readability */
-    .stTable, .stDataFrame {
-        background-color: white !important;
-        color: black !important;
-        border: 1px solid black !important;
-    }
-    .stTable td, .stTable th {
-        background-color: white !important;
-        color: black !important;
-        border: 1px solid black !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# --- Background Image (proper layering) ---
-st.markdown(
-    f"""
-    <style>
-    /* Ensure app content is fully opaque */
-    .stApp {{
-        position: relative;
-        z-index: 0;
-    }}
-
-    /* Background image layer */
-    .stApp::before {{
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url("https://raw.githubusercontent.com/ashlen2-stack/bridgemodel/4282854ff80fb53251f0071f79c8964f50ed5d37/assets/396099625_710e826d1d_b.jpg");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        z-index: -2;
-    }}
-
-    /* Soft white overlay to keep content readable */
-    .stApp::after {{
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.82); /* adjust transparency here */
-        z-index: -1;
-    }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -104,7 +51,7 @@ def fmt_num(x):
 
 # --- Title ---
 st.markdown(
-    "<h2 style='text-align:center; margin-top:-55px;'>Washington State Bridge Network Strategy Simulator</h2>",
+    "<h2 style='text-align:center; margin-top:-40px;'>Washington State Bridge Network Strategy Simulator</h2>",
     unsafe_allow_html=True,
 )
 
@@ -239,14 +186,6 @@ with middle_col:
                 color=alt.Color("Condition:N", scale=color_scale),
             )
             .properties(height=350)
-            .configure_axis(
-                labelColor='black',
-                titleColor='black',
-                gridColor='lightgray'
-            )
-            .configure_view(
-                fill='white'
-            )
         )
 
         st.altair_chart(cond_chart, use_container_width=True)
@@ -289,14 +228,6 @@ with middle_col:
                 y=alt.Y("Closed Bridges:Q", title="Number of Closed Bridges"),
             )
             .properties(height=300)
-            .configure_axis(
-                labelColor='black',
-                titleColor='black',
-                gridColor='lightgray'
-            )
-            .configure_view(
-                fill='white'
-            )
         )
 
         st.altair_chart(closed_chart, use_container_width=True)
