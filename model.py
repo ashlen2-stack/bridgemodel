@@ -18,17 +18,14 @@ def initialize_state(years: int):
 def simulate_deterioration(state, det_good_to_fair, det_fair_to_poor, det_poor_to_closed):
     new_state = state.copy()
 
-    # Good → Fair
     move_gf = det_good_to_fair * state[GOOD]
     new_state[GOOD] -= move_gf
     new_state[FAIR] += move_gf
 
-    # Fair → Poor
     move_fp = det_fair_to_poor * state[FAIR]
     new_state[FAIR] -= move_fp
     new_state[POOR] += move_fp
 
-    # Poor → Closed
     move_pc = det_poor_to_closed * state[POOR]
     new_state[POOR] -= move_pc
     new_state[CLOSED] += move_pc
@@ -125,7 +122,6 @@ def simulate_network(
     total_replaced = 0.0
 
     for year in range(1, years + 1):
-        # Deterioration
         state = simulate_deterioration(
             state,
             det_good_to_fair,

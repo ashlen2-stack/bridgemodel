@@ -14,12 +14,22 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    /* Slider bar color */
     div[data-baseweb="slider"] > div > div {
         background-color: #007b3e !important;
+        height: 6px !important;
     }
     div[data-baseweb="slider"] > div > div > div {
         background-color: #007b3e !important;
     }
+
+    /* Increase slider label + dropdown label font */
+    label[data-testid="stWidgetLabel"] {
+        font-size: 1.05rem !important;
+        font-weight: 500 !important;
+    }
+
+    /* Run button */
     div.stButton > button:first-child {
         background-color: #fa8072;
         color: white;
@@ -41,7 +51,7 @@ def fmt_num(x):
 
 # --- Title ---
 st.markdown(
-    "<h2 style='text-align:center; margin-top:-25px;'>Washington State Bridge Network Strategy Simulator</h2>",
+    "<h2 style='text-align:center; margin-top:-40px;'>Washington State Bridge Network Strategy Simulator</h2>",
     unsafe_allow_html=True,
 )
 
@@ -75,7 +85,6 @@ with left_col:
 with middle_col:
     st.subheader("Model Inputs & Strategy Selection")
 
-    # Sliders
     annual_budget_m = st.slider(
         "Annual Budget (million $)",
         min_value=50,
@@ -101,7 +110,6 @@ with middle_col:
         step=0.1,
     )
 
-    # Hard-coded calibrated parameters
     pres_cost = 125
     repl_cost = 2500
 
@@ -114,7 +122,6 @@ with middle_col:
     det_fair_to_poor = 1 / 57.92504134
     det_poor_to_closed = 1 / 54.95117
 
-    # Strategy selection
     strategy_label_to_key = {
         "Rehab Fair Condition First": "fair_first",
         "Rehab Poor Condition First": "poor_first",
@@ -123,7 +130,7 @@ with middle_col:
     }
 
     strategy_label = st.selectbox(
-        "Select a Policy Strategy",
+        "Select a Policy Strategy:",
         options=list(strategy_label_to_key.keys()),
         index=0,
     )
@@ -152,11 +159,9 @@ with middle_col:
             replacement_share=replacement_share,
         )
 
-        # Convert to number of bridges
         df_bridges = df / avg_deck_area
         closed_bridges = closed_series / avg_deck_area
 
-        # Condition Trajectories Chart
         st.subheader("Condition Trajectories Over Time (Number of Bridges)")
 
         chart_df = df_bridges.reset_index().rename(columns={"index": "Year"})
@@ -194,6 +199,12 @@ with middle_col:
                 fmt_pct(stats["final_share_poor"]),
                 fmt_pct(stats["final_share_closed"]),
             ],
+            "Number of Bridges": [
+                fmt_num(df_bridges[GOOD].iloc[-1]),
+                fmt_num(df_bridges[FAIR].iloc[-1]),
+                fmt_num(df_bridges[POOR].iloc[-1]),
+                fmt_num(df_bridges[CLOSED].iloc[-1]),
+            ],
         }))
 
         st.markdown(
@@ -228,27 +239,27 @@ with right_col:
     st.markdown(
         """
         **Rehab Fair Condition First**  
-        Prioritizes preserving Fair bridges to prevent deterioration into Poor condition.
+        Prioritizes preserving Fair bridges to prevent deterioration into Poor condition. This strategy reflects WSDOT’s current preservation philosophy and supports the statewide goal of maintaining at least 90% of bridges in Fair or better condition.
         """
     )
 
     st.markdown(
         """
         **Rehab Poor Condition First**  
-        Allocates funding to Poor bridges before preserving Fair bridges.
+        Allocates funding to Poor bridges before preserving Fair bridges. This reactive strategy focuses on the worst‑condition structures but may allow Fair bridges to deteriorate if budgets are limited.
         """
     )
 
     st.markdown(
         """
         **Replace Closed Bridges First**  
-        Directs funding first toward replacing Closed bridges, then Poor bridges.
+        Directs funding first toward replacing Closed bridges, then Poor bridges, and finally preserving Fair bridges. This strategy highlights the long‑term cost of allowing closures to accumulate.
         """
     )
 
     st.markdown(
         """
         **Balanced Strategy (Slider-Controlled)**  
-        Splits the annual budget between preservation and replacement according to the slider.
+        Splits the annual budget between preserving Fair bridges and replacing Closed/Poor bridges. The slider controls the share of the annual budget allocated to replacement; the remainder is used for Fair preservation.
         """
     )
