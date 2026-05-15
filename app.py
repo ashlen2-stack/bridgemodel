@@ -223,7 +223,7 @@ with middle_col:
             ],
             "Number of Bridges": [
                 fmt_num(df_bridges[GOOD].iloc[-1]),
-                fmt_num(df_bridges[FAIL].iloc[-1]),
+                fmt_num(df_bridges[FAIR].iloc[-1]),
                 fmt_num(df_bridges[POOR].iloc[-1]),
                 fmt_num(df_bridges[CLOSED].iloc[-1]),
             ],
