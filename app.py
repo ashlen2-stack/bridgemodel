@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- Custom CSS ---
+# --- Core UI CSS ---
 st.markdown(
     """
     <style>
@@ -38,21 +38,45 @@ st.markdown(
         padding: 0.5rem 1.5rem;
         font-weight: 600;
     }
+
+    /* Table readability */
+    .stTable, .stDataFrame {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid black !important;
+    }
+    .stTable td, .stTable th {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid black !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# --- Background Image ---
+# --- Background Image (proper layering) ---
 st.markdown(
     f"""
     <style>
     .stApp {{
+        position: relative;
+        background: none;
+    }}
+
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background-image: url("https://raw.githubusercontent.com/ashlen2-stack/bridgemodel/4282854ff80fb53251f0071f79c8964f50ed5d37/assets/396099625_710e826d1d_b.jpg");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
-        opacity: 0.12;
+        opacity: 0.18;
+        z-index: -1;
     }}
     </style>
     """,
@@ -202,6 +226,14 @@ with middle_col:
                 color=alt.Color("Condition:N", scale=color_scale),
             )
             .properties(height=350)
+            .configure_axis(
+                labelColor='black',
+                titleColor='black',
+                gridColor='lightgray'
+            )
+            .configure_view(
+                fill='white'
+            )
         )
 
         st.altair_chart(cond_chart, use_container_width=True)
@@ -244,6 +276,14 @@ with middle_col:
                 y=alt.Y("Closed Bridges:Q", title="Number of Closed Bridges"),
             )
             .properties(height=300)
+            .configure_axis(
+                labelColor='black',
+                titleColor='black',
+                gridColor='lightgray'
+            )
+            .configure_view(
+                fill='white'
+            )
         )
 
         st.altair_chart(closed_chart, use_container_width=True)
