@@ -246,22 +246,31 @@ with middle_col:
 
         closed_df["Increasing"] = closed_df["Closed Bridges"].diff().fillna(0) > 0
 
-        closed_chart = (
+        shaded = (
             alt.Chart(closed_df)
-            .mark_area(opacity=0.15, color="lightgray")
+            .mark_area(color="lightgray", opacity=0.35)
             .encode(
                 x="Year:Q",
                 y="Closed Bridges:Q",
-                opacity=alt.condition("datum.Increasing", alt.value(0.3), alt.value(0)),
+                y2=alt.value(0),
+                opacity=alt.condition(
+                    alt.datum.Increasing,
+                    alt.value(0.35),
+                    alt.value(0)
+                )
             )
-            +
+        )
+
+        line = (
             alt.Chart(closed_df)
             .mark_line(color="black", strokeWidth=2)
             .encode(
                 x=alt.X("Year:Q", title="Year"),
                 y=alt.Y("Closed Bridges:Q", title="Number of Closed Bridges"),
             )
-        ).properties(height=300)
+        )
+
+        closed_chart = (shaded + line).properties(height=300)
 
         st.altair_chart(closed_chart, use_container_width=True)
 
