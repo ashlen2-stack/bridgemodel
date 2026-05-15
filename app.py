@@ -236,52 +236,55 @@ with middle_col:
 
         st.markdown("---")
 
-        # --- CLOSED BRIDGES CHART ---
-        st.subheader("Closed Bridges Over Time")
+     # --- CLOSED BRIDGES CHART ---
+st.subheader("Closed Bridges Over Time")
 
-        closed_df = pd.DataFrame({
-            "Year": closed_bridges.index.astype(int),
-            "Closed Bridges": closed_bridges.values,
-        })
+closed_df = pd.DataFrame({
+    "Year": closed_bridges.index.astype(int),
+    "Closed Bridges": closed_bridges.values,
+})
 
-        closed_df["Increasing"] = closed_df["Closed Bridges"].diff().fillna(0) > 0
+# Identify years where closures increase
+closed_df["Increasing"] = (closed_df["Closed Bridges"].diff() > 0).astype(int)
 
-        shaded = (
-            alt.Chart(closed_df)
-            .mark_area(color="lightgray", opacity=0.35)
-            .encode(
-                x="Year:Q",
-                y="Closed Bridges:Q",
-                y2=alt.value(0),
-                opacity=alt.condition(
-                    alt.datum.Increasing,
-                    alt.value(0.35),
-                    alt.value(0)
-                )
-            )
+# Shaded area for increasing years
+shaded = (
+    alt.Chart(closed_df)
+    .mark_area(color="lightgray")
+    .encode(
+        x="Year:Q",
+        y="Closed Bridges:Q",
+        y2=alt.value(0),
+        opacity=alt.Opacity(
+            "Increasing:Q",
+            scale=alt.Scale(domain=[0,1], range=[0,0.35])
         )
+    )
+)
 
-        line = (
-            alt.Chart(closed_df)
-            .mark_line(color="black", strokeWidth=2)
-            .encode(
-                x=alt.X("Year:Q", title="Year"),
-                y=alt.Y("Closed Bridges:Q", title="Number of Closed Bridges"),
-            )
-        )
+# Bold black line
+line = (
+    alt.Chart(closed_df)
+    .mark_line(color="black", strokeWidth=2)
+    .encode(
+        x=alt.X("Year:Q", title="Year"),
+        y=alt.Y("Closed Bridges:Q", title="Number of Closed Bridges"),
+    )
+)
 
-        closed_chart = (shaded + line).properties(height=300)
+closed_chart = (shaded + line).properties(height=300)
 
-        st.altair_chart(closed_chart, use_container_width=True)
+st.altair_chart(closed_chart, use_container_width=True)
 
-        st.markdown(
-            """
-            **How to interpret this chart:**  
-            Rising closures (highlighted in gray) indicate years where the system is falling behind, increasing future replacement needs and long‑term budget pressure.  
-            Flat or declining closures suggest the strategy is stabilizing or reducing the backlog of closed structures.  
-            This chart helps illustrate the concept of *“mortgaging the future”*—delaying preservation or replacement today increases the cost burden in later years.
-            """
-        )
+st.markdown(
+    """
+    **How to interpret this chart:**  
+    Rising closures (highlighted in gray) indicate years where the system is falling behind, increasing future replacement needs and long‑term budget pressure.  
+    Flat or declining closures suggest the strategy is stabilizing or reducing the backlog of closed structures.  
+    This chart helps illustrate the concept of *“mortgaging the future”*—delaying preservation or replacement today increases the cost burden in later years.
+    """
+)
+
 
 # --- RIGHT COLUMN ---
 with right_col:
