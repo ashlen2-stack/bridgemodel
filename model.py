@@ -18,14 +18,17 @@ def initialize_state(years: int):
 def simulate_deterioration(state, det_good_to_fair, det_fair_to_poor, det_poor_to_closed):
     new_state = state.copy()
 
+    # Good -> Fair
     move_gf = det_good_to_fair * state[GOOD]
     new_state[GOOD] -= move_gf
     new_state[FAIR] += move_gf
 
+    # Fair -> Poor
     move_fp = det_fair_to_poor * state[FAIR]
     new_state[FAIR] -= move_fp
     new_state[POOR] += move_fp
 
+    # Poor -> Closed
     move_pc = det_poor_to_closed * state[POOR]
     new_state[POOR] -= move_pc
     new_state[CLOSED] += move_pc
@@ -105,7 +108,14 @@ def simulate_network(
     det_good_to_fair: float,
     det_fair_to_poor: float,
     det_poor_to_closed: float,
+    replacement_share: float,
 ):
+    """
+    replacement_share is used in the Balanced strategy to control
+    the share of annual budget allocated to replacement vs preservation.
+    Other strategies still follow their original logic.
+    """
+
     state = {
         GOOD: init_good,
         FAIR: init_fair,
@@ -120,6 +130,7 @@ def simulate_network(
     total_replaced = 0.0
 
     for year in range(1, years + 1):
+        # Deterioration step
         state = simulate_deterioration(
             state,
             det_good_to_fair,
@@ -130,6 +141,7 @@ def simulate_network(
         budget = annual_budget
 
         if strategy == "fair_first":
+            # Preserve Fair first, then replace Poor
             state, budget, preserved = apply_preservation_fair(state, budget, pres_cost)
             total_preserved += preserved
 
@@ -137,6 +149,7 @@ def simulate_network(
             total_replaced += replaced
 
         elif strategy == "poor_first":
+            # Rehab Poor first, then preserve Fair, then replace Poor
             state, budget, rehabbed = apply_rehab_poor(state, budget, pres_cost)
             total_preserved += rehabbed
 
@@ -147,6 +160,7 @@ def simulate_network(
             total_replaced += replaced
 
         elif strategy == "replace_closed_first":
+            # Replace Closed, then Poor, then preserve Fair
             state, budget, repl_closed = apply_replace_closed(state, budget, repl_cost)
             total_replaced += repl_closed
 
@@ -157,16 +171,26 @@ def simulate_network(
             total_preserved += preserved
 
         elif strategy == "balanced":
-            half_budget = budget * 0.5
+            # Use replacement_share to split budget between preservation and replacement
+            replacement_share = max(0.0, min(1.0, replacement_share))
+            pres_budget = budget * (1.0 - replacement_share)
+            repl_budget = budget * replacement_share
 
-            state, half_budget, preserved = apply_preservation_fair(state, half_budget, pres_cost)
+            # Preservation on Fair with preservation budget
+            state, pres_budget, preserved = apply_preservation_fair(
+                state, pres_budget, pres_cost
+            )
             total_preserved += preserved
 
-            repl_budget = budget * 0.5
-            state, repl_budget, repl_closed = apply_replace_closed(state, repl_budget, repl_cost)
+            # Replacement with replacement budget: Closed first, then Poor
+            state, repl_budget, repl_closed = apply_replace_closed(
+                state, repl_budget, repl_cost
+            )
             total_replaced += repl_closed
 
-            state, repl_budget, repl_poor = apply_replace_poor(state, repl_budget, repl_cost)
+            state, repl_budget, repl_poor = apply_replace_poor(
+                state, repl_budget, repl_cost
+            )
             total_replaced += repl_poor
 
         df.loc[year, :] = [state[s] for s in STATE_ORDER]

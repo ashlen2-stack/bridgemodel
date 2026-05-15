@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 from datetime import date
 
 from model import simulate_network, GOOD, FAIR, POOR, CLOSED
 
 st.set_page_config(
-    page_title="Bridge Network Strategy Simulator",
+    page_title="Washington State Bridge Network Strategy Simulator",
     layout="wide",
 )
 
@@ -13,10 +14,12 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    .middle-container {
-        background-color: #f2f2f2;
-        padding: 20px;
-        border-radius: 10px;
+    /* WSDOT green sliders */
+    div[data-baseweb="slider"] > div > div {
+        background-color: #007b3e !important;
+    }
+    div[data-baseweb="slider"] > div > div > div {
+        background-color: #007b3e !important;
     }
     div.stButton > button:first-child {
         background-color: #fa8072;
@@ -37,6 +40,12 @@ def fmt_pct(x):
 def fmt_num(x):
     return f"{x:,.0f}"
 
+# --- Title centered above all columns ---
+st.markdown(
+    "<h2 style='text-align: center;'>Washington State Bridge Network Strategy Simulator</h2>",
+    unsafe_allow_html=True,
+)
+
 left_col, middle_col, right_col = st.columns([1.2, 2.0, 1.2])
 
 # --- LEFT COLUMN ---
@@ -45,8 +54,6 @@ with left_col:
 
     st.markdown(
         """
-        ## Bridge Network Strategy Simulator
-
         Washington’s bridge network includes more than 56 million square feet of deck area, much of it aging and increasingly expensive to maintain. Recent closures — including the Carbon River Bridge on SR 165 and the Wishkah River Bridge in Aberdeen — highlight the consequences of deferred preservation and the growing challenge of prioritizing limited maintenance dollars.
 
         This simulator provides a system‑level view of how different preservation and replacement strategies influence long‑term bridge conditions under constrained budgets. It is not designed to predict the future of any specific structure. Instead, it illustrates how funding levels, prioritization rules, and preservation timing shape statewide outcomes over time.
@@ -65,11 +72,9 @@ with left_col:
 
 # --- MIDDLE COLUMN ---
 with middle_col:
-    st.markdown('<div class="middle-container">', unsafe_allow_html=True)
-
     st.subheader("Model Inputs & Strategy Selection")
 
-    # Essential sliders only
+    # Essential sliders
     annual_budget_m = st.slider(
         "Annual Budget (million $)",
         min_value=50,
@@ -87,6 +92,14 @@ with middle_col:
         step=1_000,
     )
 
+    replacement_share = st.slider(
+        "Replacement Share of Annual Budget (Balanced Strategy)",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.5,
+        step=0.1,
+    )
+
     # Hard-coded model parameters
     pres_cost = 30
     repl_cost = 400
@@ -99,7 +112,28 @@ with middle_col:
     det_fair_to_poor = 0.03
     det_poor_to_closed = 0.02
 
-    # Summary tables
+    # Strategy selection and Run button moved up under sliders
+    strategy_label_to_key = {
+        "Rehab Fair Condition First": "fair_first",
+        "Rehab Poor Condition First": "poor_first",
+        "Replace Closed Bridges First": "replace_closed_first",
+        "Balanced Strategy (50/50 / Slider-Controlled)": "balanced",
+    }
+
+    strategy_label = st.selectbox(
+        "Select Strategy",
+        options=list(strategy_label_to_key.keys()),
+        index=0,
+    )
+    strategy_key = strategy_label_to_key[strategy_label]
+
+    run_col1, run_col2, run_col3 = st.columns([1, 1, 1])
+    with run_col2:
+        run = st.button("Run Model")
+
+    st.markdown("---")
+
+    # Summary tables (static, for reporting)
     st.markdown("### Initial Condition Summary")
     st.table(pd.DataFrame({
         "Condition": ["Good", "Fair", "Poor"],
@@ -124,26 +158,6 @@ with middle_col:
 
     st.markdown("---")
 
-    strategy_label_to_key = {
-        "Rehab Fair Condition First": "fair_first",
-        "Rehab Poor Condition First": "poor_first",
-        "Replace Closed Bridges First": "replace_closed_first",
-        "Balanced Strategy (50/50)": "balanced",
-    }
-
-    strategy_label = st.selectbox(
-        "Select Strategy",
-        options=list(strategy_label_to_key.keys()),
-        index=0,
-    )
-    strategy_key = strategy_label_to_key[strategy_label]
-
-    run_col1, run_col2, run_col3 = st.columns([1, 1, 1])
-    with run_col2:
-        run = st.button("Run Model")
-
-    st.markdown("---")
-
     if run:
         df, closed_series, stats = simulate_network(
             years=30,
@@ -157,10 +171,40 @@ with middle_col:
             det_good_to_fair=det_good_to_fair,
             det_fair_to_poor=det_fair_to_poor,
             det_poor_to_closed=det_poor_to_closed,
+            replacement_share=replacement_share,
         )
 
         st.subheader("Condition Trajectories Over Time")
-        st.line_chart(df[[GOOD, FAIR, POOR, CLOSED]])
+
+        chart_df = df.copy()
+        chart_df = chart_df.reset_index().rename(columns={"index": "Year"})
+        chart_df["Year"] = chart_df["Year"].astype(int)
+
+        melted = chart_df.melt(
+            id_vars="Year",
+            value_vars=[GOOD, FAIR, POOR, CLOSED],
+            var_name="Condition",
+            value_name="Deck Area",
+        )
+
+        condition_order = [GOOD, FAIR, POOR, CLOSED]
+        color_scale = alt.Scale(
+            domain=condition_order,
+            range=["#007b3e", "#ffd700", "#d62728", "#000000"],  # green, yellow, red, black
+        )
+
+        cond_chart = (
+            alt.Chart(melted)
+            .mark_line()
+            .encode(
+                x=alt.X("Year:Q", title="Year"),
+                y=alt.Y("Deck Area:Q", title="Deck Area (ft²)"),
+                color=alt.Color("Condition:N", scale=color_scale, title="Condition"),
+            )
+            .properties(height=350)
+        )
+
+        st.altair_chart(cond_chart, use_container_width=True)
 
         st.markdown("**Summary at End of Horizon**")
         st.table(pd.DataFrame({
@@ -180,7 +224,23 @@ with middle_col:
 
         st.markdown("---")
         st.subheader("Closed Bridges Over Time")
-        st.line_chart(pd.DataFrame({"Closed": closed_series}))
+
+        closed_df = pd.DataFrame({
+            "Year": closed_series.index.astype(int),
+            "Closed": closed_series.values,
+        })
+
+        closed_chart = (
+            alt.Chart(closed_df)
+            .mark_line(color="#000000")
+            .encode(
+                x=alt.X("Year:Q", title="Year"),
+                y=alt.Y("Closed:Q", title="Closed Deck Area (ft²)"),
+            )
+            .properties(height=300)
+        )
+
+        st.altair_chart(closed_chart, use_container_width=True)
 
         st.markdown("**Closed Bridges Summary**")
         st.table(pd.DataFrame({
@@ -199,8 +259,6 @@ with middle_col:
                 stats["year_peak_closed"],
             ],
         }))
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # --- RIGHT COLUMN ---
 with right_col:
@@ -229,7 +287,7 @@ with right_col:
 
     st.markdown(
         """
-        **Balanced Strategy (50/50)**  
-        Splits the annual budget evenly between preserving Fair bridges and replacing Closed/Poor bridges. Half of the budget is dedicated to Fair preservation; the other half is used to replace Closed bridges first, then Poor bridges.
+        **Balanced Strategy (50/50 / Slider-Controlled)**  
+        Splits the annual budget between preserving Fair bridges and replacing Closed/Poor bridges. The slider controls the share of the annual budget allocated to replacement; the remainder is used for Fair preservation.
         """
     )
