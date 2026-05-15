@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- Custom CSS ---
+# --- Core UI CSS ---
 st.markdown(
     """
     <style>
@@ -38,6 +38,18 @@ st.markdown(
         padding: 0.5rem 1.5rem;
         font-weight: 600;
     }
+
+    /* Table readability */
+    .stTable, .stDataFrame {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid black !important;
+    }
+    .stTable td, .stTable th {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid black !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -51,7 +63,7 @@ def fmt_num(x):
 
 # --- Title ---
 st.markdown(
-    "<h2 style='text-align:center; margin-top:-40px;'>Washington State Bridge Network Strategy Simulator</h2>",
+    "<h2 style='text-align:center; margin-top:-55px;'>Washington State Bridge Network Strategy Simulator</h2>",
     unsafe_allow_html=True,
 )
 
@@ -162,7 +174,8 @@ with middle_col:
         df_bridges = df / avg_deck_area
         closed_bridges = closed_series / avg_deck_area
 
-        st.subheader("Condition Trajectories Over Time (Number of Bridges)")
+        # --- MAIN CHART ---
+        st.subheader(f"{strategy_label} Condition Trajectories Over Time")
 
         chart_df = df_bridges.reset_index().rename(columns={"index": "Year"})
         melted = chart_df.melt(
@@ -186,10 +199,19 @@ with middle_col:
                 color=alt.Color("Condition:N", scale=color_scale),
             )
             .properties(height=350)
+            .configure_axis(
+                labelColor='black',
+                titleColor='black',
+                gridColor='lightgray'
+            )
+            .configure_view(
+                fill='white'
+            )
         )
 
         st.altair_chart(cond_chart, use_container_width=True)
 
+        # --- SUMMARY TABLE ---
         st.markdown("**Summary at End of Horizon**")
         st.table(pd.DataFrame({
             "Condition": ["Good", "Fair", "Poor", "Closed"],
@@ -213,6 +235,8 @@ with middle_col:
         )
 
         st.markdown("---")
+
+        # --- CLOSED BRIDGES CHART ---
         st.subheader("Closed Bridges Over Time")
 
         closed_df = pd.DataFrame({
@@ -220,17 +244,35 @@ with middle_col:
             "Closed Bridges": closed_bridges.values,
         })
 
+        closed_df["Increasing"] = closed_df["Closed Bridges"].diff().fillna(0) > 0
+
         closed_chart = (
             alt.Chart(closed_df)
-            .mark_line(color="#000000")
+            .mark_area(opacity=0.15, color="lightgray")
+            .encode(
+                x="Year:Q",
+                y="Closed Bridges:Q",
+                opacity=alt.condition("datum.Increasing", alt.value(0.3), alt.value(0)),
+            )
+            +
+            alt.Chart(closed_df)
+            .mark_line(color="black", strokeWidth=2)
             .encode(
                 x=alt.X("Year:Q", title="Year"),
                 y=alt.Y("Closed Bridges:Q", title="Number of Closed Bridges"),
             )
-            .properties(height=300)
-        )
+        ).properties(height=300)
 
         st.altair_chart(closed_chart, use_container_width=True)
+
+        st.markdown(
+            """
+            **How to interpret this chart:**  
+            Rising closures (highlighted in gray) indicate years where the system is falling behind, increasing future replacement needs and long‑term budget pressure.  
+            Flat or declining closures suggest the strategy is stabilizing or reducing the backlog of closed structures.  
+            This chart helps illustrate the concept of *“mortgaging the future”*—delaying preservation or replacement today increases the cost burden in later years.
+            """
+        )
 
 # --- RIGHT COLUMN ---
 with right_col:
@@ -239,7 +281,7 @@ with right_col:
     st.markdown(
         """
         **Rehab Fair Condition First**  
-        Prioritizes preserving Fair bridges to prevent deterioration into Poor condition. This strategy reflects WSDOT’s current preservation philosophy and supports the statewide goal of maintaining at least 90% of bridges in Fair or better condition.
+        Prioritizes preserving Fair bridges to prevent deterioration into Poor condition. This strategy reflects the Washington State Department of Transportation (WSDOT)’s current preservation philosophy and supports the statewide goal of maintaining at least 90% of bridges in Fair or better condition.
         """
     )
 
