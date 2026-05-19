@@ -605,7 +605,7 @@ with tab_methods:
 # MORE PLOTS TAB
 # =========================================================
 with tab_more:
-    st.subheader("Additional Plots - {strategy_label}")
+    st.subheader(f"Additional Plots - {strategy_label}")
 
     st.markdown(
         """
