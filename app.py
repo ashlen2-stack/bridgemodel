@@ -360,7 +360,7 @@ with tab_home:
         # -------------------------------------------------
         st.subheader("Closed Bridges and Replacement Backlog Cost Over Time")
 
-                closed_df = pd.DataFrame({
+        closed_df = pd.DataFrame({
             "Year": closed_bridges.index.astype(int),
             "Closed Bridges": closed_bridges.values,
         })
