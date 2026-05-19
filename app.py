@@ -360,15 +360,22 @@ with tab_home:
         # -------------------------------------------------
         st.subheader("Closed Bridges and Replacement Backlog Cost Over Time")
 
-        closed_df = pd.DataFrame({
-            "Year": closed_bridges.index.astype(int),
-            "Closed Bridges": closed_bridges.values,
-        })
+  closed_df = pd.DataFrame({
+    "Year": closed_bridges.index.astype(int),
+    "Closed Bridges": closed_bridges.values,
+})
 
-        closed_df["Backlog Cost"] = (
-            closed_df["Closed Bridges"] * AVG_DECK_AREA * REPL_COST
-        )
-        closed_df["Backlog Cost (Millions)"] = closed_df["Backlog Cost"] / 1_000_000
+# Always compute backlog cost
+closed_df["Backlog Cost"] = (
+    closed_df["Closed Bridges"] * AVG_DECK_AREA * REPL_COST
+)
+closed_df["Backlog Cost (Millions)"] = closed_df["Backlog Cost"] / 1_000_000
+
+# Always compute required budget (needed for More Plots tab)
+closed_df["Required Budget"] = (
+    closed_df["Closed Bridges"] * AVG_DECK_AREA * REPL_COST
+)
+
 
         # Black line = closed bridges
         line_closed = (
