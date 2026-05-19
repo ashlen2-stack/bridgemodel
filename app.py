@@ -605,7 +605,7 @@ with tab_methods:
 # MORE PLOTS TAB
 # =========================================================
 with tab_more:
-    st.subheader("Additional Plots")
+    st.subheader("Additional Plots - {strategy_label}")
 
     st.markdown(
         """
@@ -653,26 +653,7 @@ with tab_more:
 
         st.markdown("---")
 
-        # -------------------------------------------------
-        # FULL-WIDTH CHART 2: ANNUAL CLOSED BRIDGES
-        # -------------------------------------------------
-        st.markdown("Annual Number of Closed Bridges")
-
-        closed_ts = (
-            alt.Chart(closed_df)
-            .mark_line(color="black", strokeWidth=2)
-            .encode(
-                x="Year:Q",
-                y=alt.Y("Closed Bridges:Q", title="Closed Bridges"),
-            )
-            .properties(height=300)
-        )
-
-        st.altair_chart(closed_ts, use_container_width=True)
-
-        st.markdown("---")
-
-        # -------------------------------------------------
+               # -------------------------------------------------
         # FULL-WIDTH CHART 3: ANNUAL BACKLOG COST
         # -------------------------------------------------
         st.markdown("Annual Replacement Backlog Cost (Millions)")
@@ -696,37 +677,7 @@ with tab_more:
         # -------------------------------------------------
         col_left, col_right = st.columns(2)
 
-        # LEFT COLUMN: FAIR OR BETTER (DUPLICATE)
-        with col_left:
-            st.markdown("Percent of Bridges in Fair or Better Condition")
-
-            fb_df = pd.DataFrame({
-                "Year": df_bridges.index.astype(int),
-                "Fair or Better": fair_better.values,
-                "Target": [0.9] * len(fair_better),
-            })
-
-            fair_line = (
-                alt.Chart(fb_df)
-                .mark_line(color="#ffd700", strokeWidth=2)
-                .encode(
-                    x="Year:Q",
-                    y=alt.Y("Fair or Better:Q", title="Share of Bridges", axis=alt.Axis(format='%')),
-                )
-            )
-
-            target_line = (
-                alt.Chart(fb_df)
-                .mark_line(color="black", strokeDash=[4, 4], strokeWidth=2)
-                .encode(
-                    x="Year:Q",
-                    y="Target:Q",
-                )
-            )
-
-            fb_chart = alt.layer(fair_line, target_line).properties(height=250)
-            st.altair_chart(fb_chart, use_container_width=True)
-
+     
         # RIGHT COLUMN: STACKED AREA OF DECK AREA BY CONDITION
         with col_right:
             st.markdown("Total Deck Area by Condition Over Time")
