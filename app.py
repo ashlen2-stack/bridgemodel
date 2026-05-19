@@ -435,8 +435,11 @@ with tab_home:
                 )
             else:
                 st.markdown(
-                    f"The maximum annual budget required to replace all closed bridges in a single year is {fmt_money(max_required)}.  
-                    The current budget would need to increase by {fmt_money(max_required - annual_budget)} to fully clear the backlog in that peak year."
+                    st.markdown(
+    f"The maximum annual budget required to replace all closed bridges in a single year is {fmt_money(max_required)}. "
+    f"The current budget would need to increase by {fmt_money(max_required - annual_budget)} to fully clear the backlog in that peak year."
+)
+
                 )
 
             # -----------------------------
