@@ -216,6 +216,14 @@ with tab_home:
     # -----------------------------------------------------
     # MODEL EXECUTION (RUN BUTTON)
     # -----------------------------------------------------
+    replacement_share = st.slider(
+    	"Replacement share",
+   	 min_value=0.0,
+   	 max_value=1.0,
+   	 value=0.5,
+   	 step=0.05,
+    )
+
     if run:
 
         # Run the model
@@ -629,7 +637,6 @@ with tab_more:
             "Deterioration P→C": flows["det_pc"],
             "Preservation F→G": flows["pres_fair"],
             "Preservation P→F": flows["pres_poor"],
-            "Replacement P→G": flows["repl_poor"],
             "Replacement C→G": flows["repl_closed"],
         })
 
@@ -851,7 +858,8 @@ with tab_more:
         # -------------------------------------------------
         st.markdown(
             """
-            Flow-based plots (preservation, replacement, and deterioration flows) will be added in a 
+            Flow-based plots (preservation, replacement, and deterioration 
+) will be added in a 
             future version once the model outputs annual flow series.
             """
         )
