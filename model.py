@@ -143,6 +143,12 @@ def simulate_network(
     # --------------------------------------------------
     for year in range(1, years + 1):
 
+        # Default zero flows for this year
+        preserved_fair = 0.0
+        preserved_poor = 0.0
+        replaced_poor = 0.0
+        replaced_closed = 0.0
+
         # --- Deterioration step ---
         prev_state = state.copy()
         state = simulate_deterioration(
@@ -165,38 +171,38 @@ def simulate_network(
         # --------------------------------------------------
         if strategy == "fair_first":
             state, budget, preserved = apply_preservation_fair(state, budget, pres_cost)
+            preserved_fair = preserved
             total_preserved += preserved
-            flow_pres_fair.append(preserved)
 
             state, budget, replaced = apply_replace_poor(state, budget, repl_cost)
+            replaced_poor = replaced
             total_replaced += replaced
-            flow_repl_poor.append(replaced)
 
         elif strategy == "poor_first":
             state, budget, rehabbed = apply_rehab_poor(state, budget, pres_cost)
+            preserved_poor = rehabbed
             total_preserved += rehabbed
-            flow_pres_poor.append(rehabbed)
 
             state, budget, preserved = apply_preservation_fair(state, budget, pres_cost)
+            preserved_fair = preserved
             total_preserved += preserved
-            flow_pres_fair.append(preserved)
 
             state, budget, replaced = apply_replace_poor(state, budget, repl_cost)
+            replaced_poor = replaced
             total_replaced += replaced
-            flow_repl_poor.append(replaced)
 
         elif strategy == "replace_closed_first":
             state, budget, repl_closed = apply_replace_closed(state, budget, repl_cost)
+            replaced_closed = repl_closed
             total_replaced += repl_closed
-            flow_repl_closed.append(repl_closed)
 
             state, budget, repl_poor = apply_replace_poor(state, budget, repl_cost)
+            replaced_poor = repl_poor
             total_replaced += repl_poor
-            flow_repl_poor.append(repl_poor)
 
             state, budget, preserved = apply_preservation_fair(state, budget, pres_cost)
+            preserved_fair = preserved
             total_preserved += preserved
-            flow_pres_fair.append(preserved)
 
         elif strategy == "balanced":
             replacement_share = max(0.0, min(1.0, replacement_share))
@@ -206,20 +212,28 @@ def simulate_network(
             state, pres_budget, preserved = apply_preservation_fair(
                 state, pres_budget, pres_cost
             )
+            preserved_fair = preserved
             total_preserved += preserved
-            flow_pres_fair.append(preserved)
 
             state, repl_budget, repl_closed = apply_replace_closed(
                 state, repl_budget, repl_cost
             )
+            replaced_closed = repl_closed
             total_replaced += repl_closed
-            flow_repl_closed.append(repl_closed)
 
             state, repl_budget, repl_poor = apply_replace_poor(
                 state, repl_budget, repl_cost
             )
+            replaced_poor = repl_poor
             total_replaced += repl_poor
-            flow_repl_poor.append(repl_poor)
+
+        # --------------------------------------------------
+        # RECORD FLOWS FOR THIS YEAR
+        # --------------------------------------------------
+        flow_pres_fair.append(preserved_fair)
+        flow_pres_poor.append(preserved_poor)
+        flow_repl_poor.append(replaced_poor)
+        flow_repl_closed.append(replaced_closed)
 
         # Save state for this year
         df.loc[year, :] = [state[s] for s in STATE_ORDER]
