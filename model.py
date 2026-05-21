@@ -199,4 +199,4 @@ def simulate_network(
         "year_peak_closed": closed_series.idxmax(),
     }
 
-    return df, closed_series, stats
+    return df, closed_series, stats, flows
