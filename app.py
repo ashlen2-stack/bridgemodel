@@ -770,16 +770,13 @@ with tab_more:
 
         st.markdown(
             f"""
-            **Average annual replacement (bridges):**  
-            • Poor → Good: {avg_repl['Replacement P→G'] / AVG_DECK_AREA:.1f}  
+            **Average annual replacement (bridges):**         
             • Closed → Good: {avg_repl['Replacement C→G'] / AVG_DECK_AREA:.1f}  
 
-            **Peak replacement year (bridges):**  
-            • Poor → Good: {peak_repl['Replacement P→G'] / AVG_DECK_AREA:.1f}  
+            **Peak replacement year (bridges):**              
             • Closed → Good: {peak_repl['Replacement C→G'] / AVG_DECK_AREA:.1f}  
 
-            **Final year replacement (bridges):**  
-            • Poor → Good: {final_repl['Replacement P→G'] / AVG_DECK_AREA:.1f}  
+            **Final year replacement (bridges):**              
             • Closed → Good: {final_repl['Replacement C→G'] / AVG_DECK_AREA:.1f}  
             """
         )
