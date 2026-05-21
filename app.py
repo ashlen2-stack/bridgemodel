@@ -219,7 +219,7 @@ with tab_home:
     if run:
 
         # Run the model
-        df, closed_series, stats = simulate_network(
+        df, closed_series, stats, flows = simulate_network(
             years=30,
             strategy=strategy_key,
             annual_budget=annual_budget,
@@ -617,8 +617,23 @@ with tab_more:
     # Require that the model has been run
     if not run:
         st.info("Run the model on the Home tab to view additional plots.")
-    else:
+   else:
 
+    # -------------------------------------------------
+    # BUILD FLOWS DATAFRAME
+    # -------------------------------------------------
+    flows_df = pd.DataFrame({
+        "Year": range(len(flows["det_gf"])),
+        "Deterioration G→F": flows["det_gf"],
+        "Deterioration F→P": flows["det_fp"],
+        "Deterioration P→C": flows["det_pc"],
+        "Preservation F→G": flows["pres_fair"],
+        "Preservation P→F": flows["pres_poor"],
+        "Replacement P→G": flows["repl_poor"],
+        "Replacement C→G": flows["repl_closed"],
+    })
+
+	
         # -------------------------------------------------
         # FULL-WIDTH CHART 1: REQUIRED VS AVAILABLE (TIME SERIES)
         # -------------------------------------------------
@@ -678,39 +693,6 @@ with tab_more:
         col_left, col_right = st.columns(2)
 
      
-        # RIGHT COLUMN: STACKED AREA OF DECK AREA BY CONDITION
-        with col_right:
-            st.markdown("Total Deck Area by Condition Over Time")
-
-            area_df = df.reset_index().rename(columns={"index": "Year"})
-            melted_area = area_df.melt(
-                id_vars="Year",
-                value_vars=[GOOD, FAIR, POOR, CLOSED],
-                var_name="Condition",
-                value_name="Deck Area",
-            )
-
-            area_chart = (
-                alt.Chart(melted_area)
-                .mark_area()
-                .encode(
-                    x="Year:Q",
-                    y=alt.Y("Deck Area:Q", title="Square feet"),
-                    color=alt.Color(
-                        "Condition:N",
-                        scale=alt.Scale(
-                            domain=[GOOD, FAIR, POOR, CLOSED],
-                            range=["#007b3e", "#ffd700", "#d62728", "#000000"],
-                        ),
-                    ),
-                )
-                .properties(height=250)
-            )
-
-            st.altair_chart(area_chart, use_container_width=True)
-
-        st.markdown("---")
-
         # -------------------------------------------------
         # PLACEHOLDER FOR FUTURE FLOW-BASED PLOTS
         # -------------------------------------------------
