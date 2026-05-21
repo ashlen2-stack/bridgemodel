@@ -614,25 +614,178 @@ with tab_more:
         """
     )
 
-    # Require that the model has been run
+       # Require that the model has been run
     if not run:
         st.info("Run the model on the Home tab to view additional plots.")
-else:
+    else:
 
-    # -------------------------------------------------
-    # BUILD FLOWS DATAFRAME
-    # -------------------------------------------------
-    flows_df = pd.DataFrame({
-        "Year": range(len(flows["det_gf"])),
-        "Deterioration G→F": flows["det_gf"],
-        "Deterioration F→P": flows["det_fp"],
-        "Deterioration P→C": flows["det_pc"],
-        "Preservation F→G": flows["pres_fair"],
-        "Preservation P→F": flows["pres_poor"],
-        "Replacement P→G": flows["repl_poor"],
-        "Replacement C→G": flows["repl_closed"],
-    })
+        # --------------------------------------------------
+        # BUILD FLOWS DATAFRAME
+        # --------------------------------------------------
+        flows_df = pd.DataFrame({
+            "Year": range(len(flows["det_gf"])),
+            "Deterioration G→F": flows["det_gf"],
+            "Deterioration F→P": flows["det_fp"],
+            "Deterioration P→C": flows["det_pc"],
+            "Preservation F→G": flows["pres_fair"],
+            "Preservation P→F": flows["pres_poor"],
+            "Replacement P→G": flows["repl_poor"],
+            "Replacement C→G": flows["repl_closed"],
+        })
 
+        # --------------------------------------------------
+        # 1. DETERIORATION FLOWS
+        # --------------------------------------------------
+        st.markdown("### Deterioration Flows Over Time")
+
+        det_df = flows_df[[
+            "Year",
+            "Deterioration G→F",
+            "Deterioration F→P",
+            "Deterioration P→C"
+        ]]
+        det_melt = det_df.melt(id_vars="Year", var_name="Flow", value_name="Deck Area")
+
+        det_chart = (
+            alt.Chart(det_melt)
+            .mark_line(strokeWidth=2)
+            .encode(
+                x="Year:Q",
+                y=alt.Y("Deck Area:Q", title="Square feet"),
+                color=alt.Color(
+                    "Flow:N",
+                    scale=alt.Scale(range=["#007b3e", "#ffd700", "#d62728"])
+                ),
+            )
+            .properties(height=300)
+        )
+        st.altair_chart(det_chart, use_container_width=True)
+
+        # Text summary
+        avg_det = det_df.mean()
+        peak_det = det_df.max()
+        final_det = det_df.iloc[-1]
+
+        st.markdown(
+            f"""
+            **Average annual deterioration (bridges):**  
+            • Good → Fair: {avg_det['Deterioration G→F'] / AVG_DECK_AREA:.1f}  
+            • Fair → Poor: {avg_det['Deterioration F→P'] / AVG_DECK_AREA:.1f}  
+            • Poor → Closed: {avg_det['Deterioration P→C'] / AVG_DECK_AREA:.1f}  
+
+            **Peak deterioration year (bridges):**  
+            • Good → Fair: {peak_det['Deterioration G→F'] / AVG_DECK_AREA:.1f}  
+            • Fair → Poor: {peak_det['Deterioration F→P'] / AVG_DECK_AREA:.1f}  
+            • Poor → Closed: {peak_det['Deterioration P→C'] / AVG_DECK_AREA:.1f}  
+
+            **Final year deterioration (bridges):**  
+            • Good → Fair: {final_det['Deterioration G→F'] / AVG_DECK_AREA:.1f}  
+            • Fair → Poor: {final_det['Deterioration F→P'] / AVG_DECK_AREA:.1f}  
+            • Poor → Closed: {final_det['Deterioration P→C'] / AVG_DECK_AREA:.1f}  
+            """
+        )
+
+        st.markdown("---")
+
+        # --------------------------------------------------
+        # 2. PRESERVATION FLOWS
+        # --------------------------------------------------
+        st.markdown("### Preservation Flows Over Time")
+
+        pres_df = flows_df[[
+            "Year",
+            "Preservation F→G",
+            "Preservation P→F"
+        ]]
+        pres_melt = pres_df.melt(id_vars="Year", var_name="Flow", value_name="Deck Area")
+
+        pres_chart = (
+            alt.Chart(pres_melt)
+            .mark_line(strokeWidth=2)
+            .encode(
+                x="Year:Q",
+                y=alt.Y("Deck Area:Q", title="Square feet"),
+                color=alt.Color(
+                    "Flow:N",
+                    scale=alt.Scale(range=["#1f77b4", "#9467bd"])
+                ),
+            )
+            .properties(height=300)
+        )
+        st.altair_chart(pres_chart, use_container_width=True)
+
+        # Text summary
+        avg_pres = pres_df.mean()
+        peak_pres = pres_df.max()
+        final_pres = pres_df.iloc[-1]
+
+        st.markdown(
+            f"""
+            **Average annual preservation (bridges):**  
+            • Fair → Good: {avg_pres['Preservation F→G'] / AVG_DECK_AREA:.1f}  
+            • Poor → Fair: {avg_pres['Preservation P→F'] / AVG_DECK_AREA:.1f}  
+
+            **Peak preservation year (bridges):**  
+            • Fair → Good: {peak_pres['Preservation F→G'] / AVG_DECK_AREA:.1f}  
+            • Poor → Fair: {peak_pres['Preservation P→F'] / AVG_DECK_AREA:.1f}  
+
+            **Final year preservation (bridges):**  
+            • Fair → Good: {final_pres['Preservation F→G'] / AVG_DECK_AREA:.1f}  
+            • Poor → Fair: {final_pres['Preservation P→F'] / AVG_DECK_AREA:.1f}  
+            """
+        )
+
+        st.markdown("---")
+
+        # --------------------------------------------------
+        # 3. REPLACEMENT FLOWS
+        # --------------------------------------------------
+        st.markdown("### Replacement Flows Over Time")
+
+        repl_df = flows_df[[
+            "Year",
+            "Replacement P→G",
+            "Replacement C→G"
+        ]]
+        repl_melt = repl_df.melt(id_vars="Year", var_name="Flow", value_name="Deck Area")
+
+        repl_chart = (
+            alt.Chart(repl_melt)
+            .mark_line(strokeWidth=2)
+            .encode(
+                x="Year:Q",
+                y=alt.Y("Deck Area:Q", title="Square feet"),
+                color=alt.Color(
+                    "Flow:N",
+                    scale=alt.Scale(range=["#2ca02c", "#000000"])
+                ),
+            )
+            .properties(height=300)
+        )
+        st.altair_chart(repl_chart, use_container_width=True)
+
+        # Text summary
+        avg_repl = repl_df.mean()
+        peak_repl = repl_df.max()
+        final_repl = repl_df.iloc[-1]
+
+        st.markdown(
+            f"""
+            **Average annual replacement (bridges):**  
+            • Poor → Good: {avg_repl['Replacement P→G'] / AVG_DECK_AREA:.1f}  
+            • Closed → Good: {avg_repl['Replacement C→G'] / AVG_DECK_AREA:.1f}  
+
+            **Peak replacement year (bridges):**  
+            • Poor → Good: {peak_repl['Replacement P→G'] / AVG_DECK_AREA:.1f}  
+            • Closed → Good: {peak_repl['Replacement C→G'] / AVG_DECK_AREA:.1f}  
+
+            **Final year replacement (bridges):**  
+            • Poor → Good: {final_repl['Replacement P→G'] / AVG_DECK_AREA:.1f}  
+            • Closed → Good: {final_repl['Replacement C→G'] / AVG_DECK_AREA:.1f}  
+            """
+        )
+
+        st.markdown("---")
 	
         # -------------------------------------------------
         # FULL-WIDTH CHART 1: REQUIRED VS AVAILABLE (TIME SERIES)
