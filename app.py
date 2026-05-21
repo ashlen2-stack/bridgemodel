@@ -617,7 +617,7 @@ with tab_more:
     # Require that the model has been run
     if not run:
         st.info("Run the model on the Home tab to view additional plots.")
-   else:
+else:
 
     # -------------------------------------------------
     # BUILD FLOWS DATAFRAME
