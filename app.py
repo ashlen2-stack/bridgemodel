@@ -216,14 +216,7 @@ with tab_home:
     # -----------------------------------------------------
     # MODEL EXECUTION (RUN BUTTON)
     # -----------------------------------------------------
-    replacement_share = st.slider(
-    	"Replacement share",
-   	 min_value=0.0,
-   	 max_value=1.0,
-   	 value=0.5,
-   	 step=0.05,
-    )
-
+    
     if run:
 
         # Run the model
@@ -751,7 +744,6 @@ with tab_more:
 
         repl_df = flows_df[[
             "Year",
-            "Replacement P→G",
             "Replacement C→G"
         ]]
         repl_melt = repl_df.melt(id_vars="Year", var_name="Flow", value_name="Deck Area")
