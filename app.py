@@ -266,7 +266,7 @@ with tab_home:
                 y=alt.Y("Bridges:Q", title="Number of Bridges"),
                 color=alt.Color("Condition:N", scale=color_scale),
             )
-            .properties(height=350)
+            .properties(width=650, height=420)
         )
 
         st.altair_chart(cond_chart, use_container_width=True)
@@ -344,7 +344,7 @@ with tab_home:
 
         fb_chart = alt.layer(fair_line, target_line).resolve_scale(
             color="independent"
-        ).properties(height=250)
+        ).properties(width=650, height=420)
 
         st.altair_chart(fb_chart, use_container_width=True)
 
@@ -405,7 +405,7 @@ with tab_home:
         closed_chart = (
             alt.layer(line_closed, line_cost)
             .resolve_scale(y="independent")
-            .properties(height=350)
+            .properties(width=650, height=420)
         )
 
         st.altair_chart(closed_chart, use_container_width=True)
@@ -466,7 +466,7 @@ with tab_home:
                     y=alt.Y("Amount:Q", title="Million dollars"),
                     color=alt.Color("Type:N", scale=alt.Scale(range=["#1f77b4", "#d62728"])),
                 )
-                .properties(height=250)
+                .properties(width=650,height=420)
             )
 
             st.altair_chart(bar_chart, use_container_width=True)
@@ -500,7 +500,7 @@ with tab_home:
 
             ts_chart = (
                 alt.layer(required_line, available_line)
-                .properties(height=300)
+                .properties(width=650, height=420)
             )
 
             st.altair_chart(ts_chart, use_container_width=True)
