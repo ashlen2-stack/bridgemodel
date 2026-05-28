@@ -269,7 +269,7 @@ with tab_home:
             .properties(width=650, height=420)
         )
 
-        st.altair_chart(cond_chart, use_container_width=True)
+        st.altair_chart(cond_chart, use_container_width=False)
 
         # -------------------------------------------------
         # SUMMARY TABLE
@@ -346,7 +346,7 @@ with tab_home:
             color="independent"
         ).properties(width=650, height=420)
 
-        st.altair_chart(fb_chart, use_container_width=True)
+        st.altair_chart(fb_chart, use_container_width=False)
 
         st.markdown(
             """
@@ -408,7 +408,7 @@ with tab_home:
             .properties(width=650, height=420)
         )
 
-        st.altair_chart(closed_chart, use_container_width=True)
+        st.altair_chart(closed_chart, use_container_width=False)
 
         st.markdown(
             """
@@ -469,7 +469,7 @@ with tab_home:
                 .properties(width=650,height=420)
             )
 
-            st.altair_chart(bar_chart, use_container_width=True)
+            st.altair_chart(bar_chart, use_container_width=False)
 
             # -----------------------------
             # TIME SERIES: REQUIRED VS AVAILABLE
@@ -503,7 +503,7 @@ with tab_home:
                 .properties(width=650, height=420)
             )
 
-            st.altair_chart(ts_chart, use_container_width=True)
+            st.altair_chart(ts_chart, use_container_width=False)
 
             st.markdown(
                 """
@@ -657,9 +657,9 @@ with tab_more:
                     scale=alt.Scale(range=["#007b3e", "#ffd700", "#d62728"])
                 ),
             )
-            .properties(height=300)
+            .properties(width=650, height=420)
         )
-        st.altair_chart(det_chart, use_container_width=True)
+        st.altair_chart(det_chart, use_container_width=False)
 
         # Text summary
         avg_det = det_df.mean()
@@ -710,9 +710,9 @@ with tab_more:
                     scale=alt.Scale(range=["#1f77b4", "#9467bd"])
                 ),
             )
-            .properties(height=300)
+            .properties(width=650, height=300)
         )
-        st.altair_chart(pres_chart, use_container_width=True)
+        st.altair_chart(pres_chart, use_container_width=False)
 
         # Text summary
         avg_pres = pres_df.mean()
@@ -759,9 +759,9 @@ with tab_more:
                     scale=alt.Scale(range=["#2ca02c", "#000000"])
                 ),
             )
-            .properties(height=300)
+            .properties(width=650, height=300)
         )
-        st.altair_chart(repl_chart, use_container_width=True)
+        st.altair_chart(repl_chart, use_container_width=False)
 
         # Text summary
         avg_repl = repl_df.mean()
@@ -812,8 +812,8 @@ with tab_more:
             )
         )
 
-        ts_chart = alt.layer(req_line, avail_line).properties(height=300)
-        st.altair_chart(ts_chart, use_container_width=True)
+        ts_chart = alt.layer(req_line, avail_line).properties(wideth=650, height=420)
+        st.altair_chart(ts_chart, use_container_width=False)
 
         st.markdown("---")
 
@@ -829,10 +829,10 @@ with tab_more:
                 x="Year:Q",
                 y=alt.Y("Backlog Cost (Millions):Q", title="Million dollars"),
             )
-            .properties(height=300)
+            .properties(width=650, height=420)
         )
 
-        st.altair_chart(backlog_ts, use_container_width=True)
+        st.altair_chart(backlog_ts, use_container_width=False)
 
         st.markdown("---")
 
